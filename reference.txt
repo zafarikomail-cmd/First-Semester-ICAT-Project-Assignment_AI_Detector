@@ -1,0 +1,4 @@
+This is a sample reference text used to demonstrate a simple AI detection system.
+It contains common academic phrases and formal connectors such as moreover, furthermore, therefore, and however.
+Use this file to compare against submitted assignment text for similarity checking.
+This highlights typical patterns found in AI-generated content, including repetitive sentence structures and formal phrasing.

@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>File Preview - Assignment AI Detector</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <div class="brand">
+        <img src="123logo.jpg" alt="Logo" class="logo" width="48" height="48">
+        <div>
+          <h1>File Preview</h1>
+          <p class="tag">View your uploaded files</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Uploaded Files</h2>
+        <div id="previewList" class="upload-list"></div>
+        <div style="margin-top:20px;display:flex;gap:8px">
+          <button onclick="goBack()" class="primary">Back</button>
+          <button id="downloadBtn" class="muted">Download Report</button>
+          <button id="previewInstructionsBtn" class="more-btn" style="margin-left:auto">Instructions</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+      <!-- Instructions modal for preview page -->
+      <div class="instruction-modal" id="instructionsModalPreview" aria-hidden="true">
+        <div class="instruction-panel">
+          <button id="previewInstructionClose" class="instruction-close" aria-label="Close">×</button>
+          <h3>Instructions — Preview</h3>
+          <p>Review all your uploaded files and their analysis results on this page.</p>
+          <ul>
+            <li>Each file displays its name, file type, and size</li>
+            <li>Click <strong>Download</strong> to download the individual report for that file</li>
+            <li>File types supported: Text documents (.txt), PDFs (.pdf), and Office documents (.docx)</li>
+            <li>Use the <strong>Back</strong> button to return to the main analyzer and upload more files</li>
+            <li>Use <strong>Download Report</strong> to save a comprehensive report of all analyzed files</li>
+          </ul>
+        </div>
+      </div>
+
+  <script src="script.js"></script>
+  <script>
+    function formatBytes(bytes){ if (bytes===0) return '0 B'; const k=1024, sizes=['B','KB','MB','GB']; const i=Math.floor(Math.log(bytes)/Math.log(k)); return (bytes/Math.pow(k,i)).toFixed(2)+' '+sizes[i]; }
+
+    function goBack() { window.history.back(); }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const previewList = document.getElementById('previewList');
+      
+      // Get files from sessionStorage (set from index.html)
+      const filesData = sessionStorage.getItem('uploadedFiles');
+      
+      if (!filesData) {
+        previewList.innerHTML = '<p class="small-muted">No files uploaded</p>';
+        return;
+      }
+
+      const files = JSON.parse(filesData);
+      
+      if (files.length === 0) {
+        previewList.innerHTML = '<p class="small-muted">No files uploaded</p>';
+        return;
+      }
+
+      previewList.innerHTML = '';
+      files.forEach((file, idx) => {
+        const div = document.createElement('div');
+        div.className = 'upload-item';
+        div.innerHTML = `
+          <div style="flex:1">
+            <div class="file-meta">${escapeHtml(file.name)} <span class="small-muted">(${file.size})</span></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="badge">${file.type || 'file'}</div>
+            <button class="muted download-single" data-index="${idx}">Download</button>
+          </div>
+        `;
+        previewList.appendChild(div);
+      });
+
+      // Delegate download clicks for individual files
+      previewList.addEventListener('click', (ev)=>{
+        const btn = ev.target.closest && ev.target.closest('.download-single');
+        if (!btn) return;
+        const idx = Number(btn.getAttribute('data-index'));
+        if (!Number.isNaN(idx) && typeof window.handleDownloadReport === 'function') window.handleDownloadReport(idx);
+      });
+    });
+
+    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[c]); }
+  </script>
+    <script>
+      // Wire preview page instruction button
+      (function(){
+        const btn = document.getElementById('previewInstructionsBtn');
+        const modal = document.getElementById('instructionsModalPreview');
+        const closer = document.getElementById('previewInstructionClose');
+        if (btn && modal){ btn.addEventListener('click', ()=> modal.setAttribute('aria-hidden','false')); }
+        if (closer && modal){ closer.addEventListener('click', ()=> modal.setAttribute('aria-hidden','true')); }
+        document.addEventListener('keydown', (e)=>{ if (e.key==='Escape') modal && modal.setAttribute('aria-hidden','true'); });
+      })();
+    </script>
+</body>
+</html>

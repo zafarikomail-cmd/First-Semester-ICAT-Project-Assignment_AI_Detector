@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Assignment AI Detector</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Libraries for client-side extraction -->
+  <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <div class="brand">
+        <img src="123logo.jpg" alt="Logo" class="logo" width="48" height="48">
+        <div>
+          <h1>Assignment AI Detector</h1>
+          <p class="tag">Simple, explainable checks for learning and teaching</p>
+        </div>
+      </div>
+      <p class="hero-note">Upload a .txt file or paste text to analyze plagiarism and AI-likelihood locally.</p>
+    </header>
+
+    <section class="grid">
+      <div class="card input-card">
+        <h2>Input</h2>
+
+        <label class="file-label" for="fileInput">Choose up to 30 files (.txt, .pdf, .docx)</label>
+        <input id="fileInput" type="file" accept=".txt,.pdf,.docx" multiple class="file-input">
+          <div class="row" style="align-items:center;margin-top:8px;gap:8px">
+            <label for="subjectSelect" class="small-muted">Subject (BS IT)</label>
+            <select id="subjectSelect" class="subject-select">
+              <option value="General">General</option>
+              <option value="Programming">Programming Fundamentals</option>
+              <option value="Discrete Structure">Discrete Structure</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="English">English</option>
+            </select>
+          </div>
+
+        <label for="textInput">Paste assignment text (will be treated as single document)</label>
+        <textarea id="textInput" rows="6" placeholder="Paste text here... (optional)"></textarea>
+
+        <div class="upload-list" id="uploadList" aria-live="polite"></div>
+
+        <div class="controls">
+          <button id="analyzeBtn" class="primary" disabled>Analyze</button>
+          <button id="clearBtn" class="muted">Clear</button>
+          <button id="downloadBtn" class="muted" style="margin-left:auto;display:none">Download Report</button>
+        </div>
+        <div id="analyzingBadge" style="margin-top:10px;display:none;align-items:center;gap:8px"><span class="loader"></span><span class="small-muted">Analyzing documents…</span></div>
+      </div>
+
+      <div class="card results-card" id="results">
+        <h2>Analysis Results</h2>
+
+        <div id="resultsGrid" class="results-grid">
+          <!-- Per-file result cards will be injected here -->
+        </div>
+
+        <div class="disclaimer" style="margin-top:12px">
+          <strong>Disclaimer:</strong> AI detection is based on linguistic patterns and provides an estimated likelihood, not a confirmed result.
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div>
+        <button class="instruction-btn more-btn" data-target="instructionsModal">Instructions</button>
+      </div>
+      <div class="muted">No external APIs. Local, explainable heuristics for learning.</div>
+    </footer>
+  </main>
+
+  <!-- Instructions modal for main page -->
+  <div class="instruction-modal" id="instructionsModal" aria-hidden="true">
+    <div class="instruction-panel">
+      <button class="instruction-close" aria-label="Close">×</button>
+      <h3>Instructions — Main Page</h3>
+      <p>Upload or paste assignment text. Select subject, then click <strong>Analyze</strong>. Use <strong>View Preview</strong> to inspect highlighted sentences suspected by heuristics.</p>
+      <ul>
+        <li>Supported files: .txt, .pdf, .docx (client-side extraction)</li>
+        <li>Analysis runs locally in your browser — no external uploads</li>
+        <li>Results show AI likelihood percentage and detection categories:
+          <ul style="margin-top:8px">
+            <li><strong>Human-written:</strong> Low AI likelihood (0-33%)</li>
+            <li><strong>Mixed:</strong> Moderate AI likelihood (34-66%)</li>
+            <li><strong>AI:</strong> High AI likelihood (67-100%)</li>
+          </ul>
+        </li>
+        <li>Use the <strong>Download Report</strong> button to save results</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Upload warning modal (single Close button) -->
+  <div class="warning-modal" id="uploadWarningModal" aria-hidden="true">
+    <div class="warning-panel">
+      <h3>File Not Uploaded</h3>
+      <div id="uploadWarningBody" style="margin-top:8px;color:#e6eef8;font-weight:500"></div>
+      <div style="margin-top:16px;text-align:right">
+        <button id="uploadWarningClose" class="primary">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

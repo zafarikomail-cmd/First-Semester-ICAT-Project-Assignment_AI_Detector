@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>More Details - Assignment AI Detector</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <div class="brand">
+        <img src="123logo.jpg" alt="Logo" class="logo" width="48" height="48">
+        <div>
+          <h1>More Details</h1>
+          <p class="tag">Additional information and documentation</p>
+        </div>
+      </div>
+      <p class="hero-note">File preview and analysis details.</p>
+    </header>
+
+    <section class="details-section">
+      <div class="card details-card">
+        <h2>File Preview</h2>
+        <div id="filePreviewContainer" class="file-preview-container"></div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div>
+        <a href="index.html" class="back-link">← Back to Detector</a>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="downloadBtn" class="muted">Download Report</button>
+        <button class="instruction-btn more-btn" data-target="instructionsModalDetails">Instructions</button>
+      </div>
+      <div class="muted">All analysis happens locally on your device</div>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    // details page will use the global instruction modal handler in script.js
+
+    document.addEventListener('DOMContentLoaded', function(){
+      const filePreviewContainer = document.getElementById('filePreviewContainer');
+      const filesContent = JSON.parse(sessionStorage.getItem('filesContent') || '[]');
+      
+      // Get fileIndex from URL parameter
+      const params = new URLSearchParams(window.location.search);
+      const fileIndex = parseInt(params.get('fileIndex') || '0', 10);
+      
+      if (filesContent.length === 0) {
+        filePreviewContainer.innerHTML = '<div class="no-files" style="padding: 40px 20px; text-align: center; color: #999;"><p style="margin-bottom: 20px;">No files to preview. Please analyze files from the main page first.</p><a href="index.html" class="primary" style="padding:10px 20px;text-decoration:none;border-radius:4px;background:#0066cc;color:white;display:inline-block;">← Back to Upload</a></div>';
+      } else if (fileIndex < 0 || fileIndex >= filesContent.length) {
+        filePreviewContainer.innerHTML = '<div class="no-files" style="padding: 40px 20px; text-align: center; color: #999;"><p style="margin-bottom: 20px;">File not found.</p><a href="index.html" class="primary" style="padding:10px 20px;text-decoration:none;border-radius:4px;background:#0066cc;color:white;display:inline-block;">← Back to Upload</a></div>';
+      } else {
+        // Render only the file at fileIndex
+        const file = filesContent[fileIndex];
+        let html = '<div style="display: grid; gap: 30px;">';
+        
+        if (file.sentencesWithDelimiters && file.sentencesWithDelimiters.length) {
+          const highlightedSet = new Set(file.highlightedIndices || []);
+          const parts = file.sentencesWithDelimiters.map((s, i) => {
+            const escaped = escapeHtml(s);
+            if (highlightedSet.has(i)) return `<mark style="background-color: yellow">${escaped}</mark>`;
+            return `${escaped}`;
+          });
+          html += `<div class="file-preview-content">${parts.join('')}</div>`;
+        } else {
+          html += `<div class="file-preview-content">${escapeHtml(file.text)}</div>`;
+        }
+        // counts and coverage (numbers bolded for visibility)
+        html += `<div style="margin-top:8px;color:#ffffff;font-size:13px;display:flex;gap:12px;flex-wrap:wrap"><div><strong>Words:</strong> <strong>${file.wordCount || 0}</strong></div><div><strong>Characters:</strong> <strong>${file.charCount || 0}</strong></div><div><strong>Sentences:</strong> <strong>${file.sentenceCount || 0}</strong></div><div><strong>Highlighted:</strong> <strong>${file.highlightedPercent || 0}%</strong></div></div>`;
+        html += '</div>';
+        filePreviewContainer.innerHTML = html;
+          // Wire download button to download only this file's report
+          try{
+            const dl = document.getElementById('downloadBtn');
+            if (dl && window && typeof window.handleDownloadReport === 'function') dl.onclick = ()=>window.handleDownloadReport(fileIndex);
+          }catch(e){}
+      }
+    });
+    
+    function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+  </script>
+
+  <!-- Instructions modal for details page -->
+  <div class="instruction-modal" id="instructionsModalDetails" aria-hidden="true">
+    <div class="instruction-panel">
+      <button class="instruction-close" aria-label="Close">×</button>
+      <h3>Instructions — Details / Preview</h3>
+      <p>This view shows the detailed file preview with AI detection analysis results.</p>
+      <ul>
+        <li><strong>Highlighted text (yellow)</strong> indicates sentences flagged as suspicious by AI detection heuristics</li>
+        <li>Review the highlighted sentences to identify potential AI-written content</li>
+        <li><strong>Metrics at the bottom:</strong> Display word count, character count, sentence count, and percentage of highlighted content</li>
+        <li>Use the <strong>Download Report</strong> button to save the full analysis for this file</li>
+        <li>Click the <strong>Back to Detector</strong> link to return to the main analyzer</li>
+        <li>If no preview appears, re-run the analysis from the main page</li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>
